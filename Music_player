@@ -1,0 +1,96 @@
+
+from tkinter import *
+from tkinter import filedialog
+import pygame
+import os
+
+
+
+root = Tk()
+root.title("Playmusic")
+root.geometry("500x300")
+
+pygame.mixer.init()
+
+songs = []
+current_song = ''
+paused = False
+
+def load_songs():
+    global current_song, songs
+    root.directory = filedialog.askdirectory()
+
+    SongList.delete(0, "end")
+    for song in os.listdir(root.directory):
+        _, ext = os.path.splitext(song)
+        if ext == ".mp3":
+            songs.append(song)
+            SongList.insert("end", song)
+
+
+    SongList.selection_set(0)
+    current_song = songs[0]
+
+
+def playfunc():
+    global current_song, paused
+    if not paused:
+        pygame.mixer.music.load(os.path.join(root.directory, current_song))
+        pygame.mixer.music.play()
+    else:
+        pygame.mixer.music.unpause()
+        paused = False
+
+def pausefunc():
+    global paused
+    pygame.mixer.music.pause()
+    paused = True
+
+def nextfunc():
+    global current_song, paused
+    try:
+        SongList.selection_clear(0, END)
+        SongList.selection_set(songs.index(current_song) + 1)
+        current_song = songs[SongList.curselection()[0]]
+        playfunc()
+    except:
+        pass
+
+def prevfunc():
+    global current_song, paused
+    try:
+        SongList.selection_clear(0, END)
+        SongList.selection_set(songs.index(current_song) - 1)
+        current_song = songs[SongList.curselection()[0]]
+        playfunc()
+    except:
+        pass
+
+SongList = Listbox(root, bg="black", fg="white", width=100, height=15)
+
+SongList.pack()
+
+Actionframe = Frame(root)
+
+
+
+
+
+
+playlist = Button(Actionframe, text="Playlist", command=load_songs)
+Play = Button(Actionframe, fg='white', bg='black', text="Play", command=playfunc)
+pause = Button(Actionframe, fg='white', bg='black', text='Pause', command=pausefunc)
+
+
+
+
+Next = Button(Actionframe, fg='white', bg='black', text='Next', command=nextfunc)
+prev = Button(Actionframe, fg='white', bg='black', text='Prev', command=prevfunc)
+Actionframe.pack()
+playlist.grid(row=0, column=0, padx=4, pady=4)
+pause.grid(row=0, column=1, padx=4, pady=4)
+Play.grid(row=0, column=2, padx=4, pady=4)
+Next.grid(row=0, column=3, padx=4, pady=4)
+prev.grid(row=0, column=4, padx=4, pady=4)
+
+root.mainloop()
